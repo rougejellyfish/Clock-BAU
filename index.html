@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tanah Clock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400&display=swap">
+<style>
+  /* Layout: one square SVG clock, centred, scaled to the smaller side of the frame */
+  :root {
+    --ink: #ffffff;
+    --font-digital: "Jost", "Futura", "Century Gothic", "Avenir Next", sans-serif;
+    color-scheme: dark;
+  }
+  html, body { height: 100%; }
+  /* Transparent by request, so the Notion page shows through */
+  body {
+    background: transparent;
+    margin: 0;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  svg {
+    width: min(100vw, 100vh);
+    height: min(100vw, 100vh);
+    max-width: 100%;
+    display: block;
+  }
+  .tick { stroke: var(--ink); stroke-linecap: round; }
+  .tick.hour { stroke-width: 0.8; }
+  .tick.quarter { stroke-width: 2.6; }
+  .hand { stroke: var(--ink); stroke-linecap: butt; fill: none; }
+  .date {
+    fill: var(--ink);
+    font-family: var(--font-digital);
+    font-weight: 300;
+    font-size: 4.6px;
+    text-anchor: middle;
+    opacity: 0.85;
+  }
+  .hand.h { stroke-width: 4; }
+  .hand.m { stroke-width: 2.4; }
+  .pin { fill: var(--ink); }
+  .digital {
+    fill: var(--ink);
+    font-family: var(--font-digital);
+    font-weight: 400;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-anchor: middle;
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+</head>
+<body>
+
+<svg id="clock" viewBox="-100 -100 200 200" role="img" aria-label="Analog clock">
+  <g id="ticks"></g>
+  <text id="digital" class="digital" x="0" y="40">--:--</text>
+  <text id="date" class="date" x="0" y="48" lengthAdjust="spacing">---</text>
+  <line id="hourHand" class="hand h" x1="0" y1="8" x2="0" y2="-40"></line>
+  <line id="minuteHand" class="hand m" x1="0" y1="10" x2="0" y2="-68"></line>
+  <circle class="pin" r="3.2"></circle>
+</svg>
+
+<script>
+  (function () {
+    var NS = "http://www.w3.org/2000/svg";
+    var ticks = document.getElementById("ticks");
+    var EDGE = 88;         // outer ends sit along an invisible square
+    var QUARTER_LEN = 11;  // 12, 3, 6, 9
+    var HOUR_LEN = 5.5;    // the other hours, half the quarter length
+
+    // Every stroke starts on the invisible square and points at the centre.
+    for (var i = 0; i < 12; i++) {
+      var a = i * Math.PI / 6;
+      var dx = Math.sin(a), dy = -Math.cos(a);
+      var reach = EDGE / Math.max(Math.abs(dx), Math.abs(dy));
+      var quarter = i % 3 === 0;
+      var inner = reach - (quarter ? QUARTER_LEN : HOUR_LEN);
+      var l = document.createElementNS(NS, "line");
+      l.setAttribute("x1", (dx * reach).toFixed(2));
+      l.setAttribute("y1", (dy * reach).toFixed(2));
+      l.setAttribute("x2", (dx * inner).toFixed(2));
+      l.setAttribute("y2", (dy * inner).toFixed(2));
+      l.setAttribute("class", "tick " + (quarter ? "quarter" : "hour"));
+      ticks.appendChild(l);
+    }
+
+    var hourHand = document.getElementById("hourHand");
+    var minuteHand = document.getElementById("minuteHand");
+    var digital = document.getElementById("digital");
+    var dateEl = document.getElementById("date");
+    var svg = document.getElementById("clock");
+
+    function pad(n) { return n < 10 ? "0" + n : "" + n; }
+
+    // Spread the date's letters so it spans exactly the width of the time above it.
+    function fitDate() {
+      try {
+        var w = digital.getBBox().width;
+        if (w > 0) dateEl.setAttribute("textLength", w.toFixed(2));
+      } catch (e) {}
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitDate);
+
+    function tick() {
+      var now = new Date();
+      var h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+      var minuteDeg = (m + s / 60) * 6;
+      var hourDeg = ((h % 12) + m / 60) * 30;
+      minuteHand.setAttribute("transform", "rotate(" + minuteDeg + ")");
+      hourHand.setAttribute("transform", "rotate(" + hourDeg + ")");
+      var label = pad(h) + ":" + pad(m);
+      if (digital.textContent !== label) {
+        digital.textContent = label;
+        var days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+        var months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+        dateEl.textContent = days[now.getDay()] + " " + pad(now.getDate()) + " " + months[now.getMonth()];
+        fitDate();
+        svg.setAttribute("aria-label", "Clock showing " + label);
+      }
+    }
+
+    tick();
+    setInterval(tick, 1000);
+  })();
+</script>
+</body>
+</html>
