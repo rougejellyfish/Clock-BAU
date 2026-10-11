@@ -28,8 +28,8 @@
     max-width: 100%;
     display: block;
   }
-  .tick { stroke: var(--ink); stroke-linecap: round; }
-  .tick.hour { stroke-width: 0.8; }
+  .tick { stroke: var(--ink); stroke-linecap: butt; }
+  .tick.hour { stroke-width: 1.1; }
   .tick.quarter { stroke-width: 2.6; }
   .hand { stroke: var(--ink); stroke-linecap: butt; fill: none; }
   .date {
@@ -40,8 +40,8 @@
     text-anchor: middle;
     opacity: 0.85;
   }
-  .hand.h { stroke-width: 4; }
-  .hand.m { stroke-width: 2.4; }
+  .hand.h { stroke-width: 4.4; }
+  .hand.m { stroke-width: 1.1; } /* matches the in-between hour strokes */
   .pin { fill: var(--ink); }
   .digital {
     fill: var(--ink);
