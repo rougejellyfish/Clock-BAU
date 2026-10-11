@@ -36,7 +36,7 @@
     fill: var(--ink);
     font-family: var(--font-digital);
     font-weight: 300;
-    font-size: 4.6px;
+    font-size: 5px;
     text-anchor: middle;
     opacity: 0.85;
   }
@@ -47,7 +47,7 @@
     fill: var(--ink);
     font-family: var(--font-digital);
     font-weight: 400;
-    font-size: 11px;
+    font-size: 12.1px;
     letter-spacing: 0.04em;
     text-anchor: middle;
     font-variant-numeric: tabular-nums;
@@ -59,7 +59,7 @@
 <svg id="clock" viewBox="-100 -100 200 200" role="img" aria-label="Analog clock">
   <g id="ticks"></g>
   <text id="digital" class="digital" x="0" y="40">--:--</text>
-  <text id="date" class="date" x="0" y="48" lengthAdjust="spacing">---</text>
+  <text id="date" class="date" x="0" y="49" lengthAdjust="spacing">---</text>
   <line id="hourHand" class="hand h" x1="0" y1="8" x2="0" y2="-40"></line>
   <line id="minuteHand" class="hand m" x1="0" y1="10" x2="0" y2="-68"></line>
   <circle class="pin" r="3.2"></circle>
@@ -73,12 +73,13 @@
     var QUARTER_LEN = 11;  // 12, 3, 6, 9
     var HOUR_LEN = 5.5;    // the other hours, half the quarter length
 
-    // Every stroke starts on the invisible square and points at the centre.
+    // Strokes point at the centre; their outer ends trace a circle.
     for (var i = 0; i < 12; i++) {
       var a = i * Math.PI / 6;
       var dx = Math.sin(a), dy = -Math.cos(a);
-      var reach = EDGE / Math.max(Math.abs(dx), Math.abs(dy));
       var quarter = i % 3 === 0;
+      // Every stroke sits on one circle; at 12, 3, 6 and 9 the circle touches the square's edge.
+      var reach = EDGE;
       var inner = reach - (quarter ? QUARTER_LEN : HOUR_LEN);
       var l = document.createElementNS(NS, "line");
       l.setAttribute("x1", (dx * reach).toFixed(2));
